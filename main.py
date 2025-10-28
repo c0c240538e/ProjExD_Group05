@@ -6,6 +6,8 @@ import sys
 # 設定
 # ----------------------------
 pygame.init()
+pygame.mixer.init() 
+
 WIDTH, HEIGHT = 900, 500
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("チャリ走風ランナー（Pygame）")
@@ -23,9 +25,9 @@ OBST_COLOR = (20, 20, 20)
 COIN_COLOR = (255, 200, 0)
 
 # ゲームパラメータ
-GROUND_Y = HEIGHT - 80
+GROUND_Y = HEIGHT - 100
 SCROLL_SPEED = 5  # 初期スクロール速度（px/frame）
-SPEED_INCREASE_RATE = 0.0005  # スコア（距離）に応じて速度増加
+SPEED_INCREASE_RATE = 0.00005  # スコア（距離）に応じて速度増加
 
 # フォント
 FONT = pygame.font.SysFont("meiryo", 24)
@@ -34,9 +36,11 @@ BIG_FONT = pygame.font.SysFont("meiryo", 48)
 # サウンド（ファイルがあれば好きなファイル名を指定する）
 # もしファイルが無い場合はコメントアウトしても動きます
 try:
-    JUMP_SOUND = pygame.mixer.Sound("jump.wav")
-    HIT_SOUND = pygame.mixer.Sound("hit.wav")
-    COIN_SOUND = pygame.mixer.Sound("coin.wav")
+    JUMP_SOUND = pygame.mixer.Sound("ex05/se_jump1.mp3")  # 効果音を読み取る
+    HIT_SOUND = pygame.mixer.Sound("ex05/爆発1.mp3")
+    COIN_SOUND = pygame.mixer.Sound("ex05/coin002.mp3")
+    pygame.mixer.music.load("ex05/maou_14_shining_star.mp3")  #  BGMを再生
+    pygame.mixer.music.set_volume(0.5)  # 音量
 except Exception:
     JUMP_SOUND = None
     HIT_SOUND = None
@@ -85,8 +89,8 @@ class Player:
 
         # 地面判定
         base_h = self.height // 2 if self.ducking else self.height
-        if self.y >= GROUND_Y - base_h:
-            self.y = GROUND_Y - base_h
+        if self.y >= GROUND_Y :
+            self.y = GROUND_Y 
             self.vy = 0
             self.on_ground = True
             self.jump_count = 0
@@ -175,7 +179,7 @@ class Ground:
         # 先頭タイルが画面左外に行ったら末尾に移動
         if self.tiles and self.tiles[0].right < 0:
             first = self.tiles.pop(0)
-            first.x = self.tiles[-1].right
+            first.x = self.tiles[-1].right 
             self.tiles.append(first)
 
     def draw(self, surf):
@@ -216,6 +220,8 @@ def draw_text(surf, text, x, y, font=FONT, col=WHITE):
 
 
 def game_loop():
+    if not pygame.mixer.music.get_busy():  # BGMが止まっていたらBGMを流す
+        pygame.mixer.music.play(-1)
     # 初期化
     player = Player(140, GROUND_Y - 48)
     ground = Ground()
@@ -289,6 +295,7 @@ def game_loop():
                     player.alive = False
                     if HIT_SOUND:
                         HIT_SOUND.play()
+                    pygame.mixer.music.stop()
                     break
 
             # 当たり判定：コイン
@@ -353,6 +360,8 @@ def game_loop():
 # ----------------------------
 # ゲーム全体のループ（リスタート対応）
 # ----------------------------
-while True:
-    game_loop()
+if __name__ == "__main__":
+    pygame.mixer.music.play(-1)  # 最初の一回BGMを流す
+    while True:
+        game_loop()
 
